@@ -69,3 +69,4 @@ def report_hash_tag_stats(user_nodes):
     print("Number of unique tags: {}".format(len(set(all_tags))))
     print("5 most common tag: {}".format(counter.most_common(5)))
     print("Avg freqeency of tags: {}".format('NOT IMPLEMENTED YET'))
+    

@@ -7,7 +7,9 @@ chardet==3.0.4
 cycler==0.10.0
 decorator==4.4.0
 docutils==0.14
+emoji==0.5.2
 gensim==3.7.3
+googletrans==2.4.0
 idna==2.8
 imageio==2.5.0
 jmespath==0.9.4
