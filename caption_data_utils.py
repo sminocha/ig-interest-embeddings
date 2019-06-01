@@ -1,7 +1,11 @@
 from googletrans import Translator
 import emoji
 
-translator = Translator()
+# constants
+language = 'en'
+
+
+googleTranslator = Translator()
 
 def remove_emojis(caption):
     """Remove emojis from the caption"""
@@ -20,10 +24,27 @@ def remove_mentions(caption):
     filtered_words = list(filter(lambda w: len(w) > 0 and w[0] != '@', words))
     return ' '.join(filtered_words)
 
-def translate(caption):
-    """Translate caption into english if necessary"""
-    en_translation = translator.translate(caption)
-    return en_translation.text
+'''
+Source language isn't given in our data, and many captions are from non
+english-speaking influencers.
+
+Translate a user's 17 captions from source language to english (uses single
+method call and single HTTP session). Return as list of translations.
+'''
+def translateToEnglish(captionsList, language):
+    en_translations = googleTranslator.translate(captionsList, dest=language)
+    en_translations = [translation.text for translation in translations]
+    return en_translations
+
+def getDetection(caption):
+    """output googletrans detection object or objects (in case input is a list)"""
+    return googleTranslator.detect(caption)
+
+def checkNoForeignCaptions(captions, language):
+    """return true if all captions are english, false if there is a foreign caption"""
+    detectionObjects = getDetection(captions)
+    whichAreEnglish = [obj.lang==language for obj in detectionObjects]
+    return all(whichAreEnglish)
 
 
 """
