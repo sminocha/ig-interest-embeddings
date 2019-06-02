@@ -43,7 +43,7 @@ import img_data_utils as img
 def main():
     data_path = 'backbones/dataset.csv'
     new_csv_location = 'backbones/modified_dataset.csv'
-    download_path = "backbones/ig_downloaded_imgs/"
+    download_path_base = "backbones/ig_downloaded_imgs/"
     # initialize pandas dataframe
     df = pd.read_csv(data_path) # to be populated with modified captions and 17 image paths
     # new_df = df # to be populated with modified captions and 17 image paths # DELETE?
@@ -58,9 +58,17 @@ def main():
 
     ## image / image path modifications
 
-    # add a column that transforms the ig links of each post to a download path leading to that post's image
-    transform_post_to_path = lambda post_url: img.create_path(post_url, download_path)
-    df['downloaded_image'] = df['url'].apply(transform_post_to_path)
+    # add column that transforms ig links of each post to individual img urls
+    extract_post_urls = lambda post_url: img.extract_img_url(post_url)
+    df['indiv_img_url'] = df['url'].apply(extract_post_urls)
+
+    # filter out records with "INVALID_URL" indiv_img_urls
+    df = df[df['indiv_img_url'] != "INVALID_URL"]
+
+    # add a column that transforms the individual img urls to a download path leading to that image
+    # includes actual download + placement of image
+    download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
+    df['downloaded_image'] = df['indiv_img_url'].apply(download_and_put_path)
 
     df.to_csv(new_csv_location) # write to csv
 
