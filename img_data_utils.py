@@ -49,6 +49,7 @@ def download_img(img_url, download_path_base, transforms=[]):
             img = transform(img)
     # Save image to download_path
     io.imsave(download_path, img)
+    return download_path
 
 def create_path(post_url, download_path, transforms=[]):
     """Given source url of post, put a copy of first image from that post in

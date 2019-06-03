@@ -2,9 +2,14 @@ import ast
 import functools
 import collections
 import numpy as np
+import pandas as pd
 import re
 import string
 import csv
+import sys
+from googletrans import Translator
+import caption_data_utils as caption
+import img_data_utils as img
 
 rgx = re.compile('[^' + ''.join(string.printable) + ']')
 
@@ -69,4 +74,36 @@ def report_hash_tag_stats(user_nodes):
     print("Number of unique tags: {}".format(len(set(all_tags))))
     print("5 most common tag: {}".format(counter.most_common(5)))
     print("Avg freqeency of tags: {}".format('NOT IMPLEMENTED YET'))
-    
+
+
+# we will select test rows by (post) url
+test_url_1 = "https://www.instagram.com/p/BTdRaquBZTD/?taken-by=1misssmeis"
+test_url_2 = "https://www.instagram.com/p/BTdS7XgBe4X/?taken-by=1misssmeis"
+row_screen = [test_url_1, test_url_2]
+def output_test_row(row_screen):
+    data_path = 'backbones/dataset.csv'
+    new_csv_location = 'backbones/modified_dataset.csv'
+    download_path_base = "backbones/ig_downloaded_imgs/"
+    # initialize pandas dataframe
+    df = pd.read_csv(data_path)
+    # dataframe with just rows selected by row_screen
+    df = df.loc[df['url'].isin(row_screen)] # select several rows by their url
+
+    # perform manipulations made in ig_preprocessing_main.py
+    df['description'] = np.where(caption.isEnglish(caption.remove_unnecessary(df['description'])), caption.remove_unnecessary(df['description']), caption.removeThenTranslate(df['description']))
+
+    # add column that transforms ig links of each post to individual img urls
+    extract_post_urls = lambda post_url: img.extract_img_url(post_url)
+    df['indiv_img_url'] = df['url'].apply(extract_post_urls)
+
+    # filter out records with "INVALID_URL" indiv_img_urls
+    df = df[df['indiv_img_url'] != "INVALID_URL"]
+
+    # add a column that transforms the individual img urls to a download path leading to that image
+    # includes actual download + placement of image
+    download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
+    df['downloaded_image'] = df['indiv_img_url'].apply(download_and_put_path)
+
+    df.to_csv(new_csv_location) # write to csv
+
+# output_test_row(row_screen)

@@ -18,6 +18,9 @@ result / output - New csv that has csv - processed text data, another column for
 TODO:
  - could eventually split this up into multiple files, one that handles caption parsing (translation function, filtering, etc.)
  - and this one that just houses the main function.
+ - clean up comments
+ - make filtration more robust
+ - test at end to see how many records lost
 '''
 
 import csv
