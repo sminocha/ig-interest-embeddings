@@ -9,7 +9,16 @@ python xyzxyz -x flag -y flag etc etc (different run commands)
 
 ## Preprocessing Commands
 
-## Industry TODO
+- uncomment call to output_test_row in data_utils.py and run to get demo dataset (used for pipelining)
+- run ig_preprocessing_main.py to output full dataset
+
+## Preprocessing TODO
+- mods to ig_preprocessing_main.py
+- hook + try catch functionality in img_data_utils.py (for full dataset)
+- make filename hash deterministic 
+- run scripts to output final csv
+- clean up code / comments
+- finalize Preprocessing part of readme
 
 # Setup
 

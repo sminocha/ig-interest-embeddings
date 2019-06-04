@@ -84,10 +84,15 @@ def output_test_row(row_screen):
     data_path = 'backbones/dataset.csv'
     new_csv_location = 'backbones/modified_dataset.csv'
     download_path_base = "backbones/ig_downloaded_imgs/"
+    desired_cols = ["username", "tags", "url", "urlImage", "mentions", "description", "indiv_img_url", "downloaded_image"]
+    cols_to_drop = ["website", "numberPosts", "numberFollowers", "numberFollowing", "filename", "date", "isVideo", "numberLikes"]
     # initialize pandas dataframe
     df = pd.read_csv(data_path)
     # dataframe with just rows selected by row_screen
     df = df.loc[df['url'].isin(row_screen)] # select several rows by their url
+
+    # remove unnecessary cols
+    df = df.drop(columns=cols_to_drop)
 
     # perform manipulations made in ig_preprocessing_main.py
     df['description'] = np.where(caption.isEnglish(caption.remove_unnecessary(df['description'])), caption.remove_unnecessary(df['description']), caption.removeThenTranslate(df['description']))
@@ -104,6 +109,18 @@ def output_test_row(row_screen):
     download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
     df['downloaded_image'] = df['indiv_img_url'].apply(download_and_put_path)
 
+    df['description'] = df[desired_cols].groupby(['username'])['description'].transform(lambda x: ' '.join(x))
+    df['downloaded_image'] = df[desired_cols].groupby(['username'])['downloaded_image'].transform(lambda x: ','.join(x))
+    # df['urlImage'] = df[desired_cols].groupby(['username'])['urlImage'].transform(lambda x: ','.join(x))
+    df['mentions'] = df[desired_cols].groupby(['username'])['mentions'].transform(lambda x: ','.join(x))
+    df['tags'] = df[desired_cols].groupby(['username'])['tags'].transform(lambda x: ','.join(x))
+    df['indiv_img_url'] = df[desired_cols].groupby(['username'])['indiv_img_url'].transform(lambda x: ','.join(x))
+
+    # df = df[desired_cols].drop_duplicates()
+
+    # df.groupby(['username'])['description'].apply(' '.join).reset_index() # concatanate post descriptions from each user using space
+    # df.groupby(['username'])['download_img'].apply(', '.join).reset_index() # comma separate image paths of images from each user using space
+
     df.to_csv(new_csv_location) # write to csv
 
-# output_test_row(row_screen)
+output_test_row(row_screen)
