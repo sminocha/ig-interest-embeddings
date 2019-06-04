@@ -17,6 +17,7 @@ joblib==0.13.2
 kiwisolver==1.1.0
 matplotlib==3.1.0
 networkx==2.3
+nltk==3.4.1
 node2vec==0.3.0
 numpy==1.16.3
 pandas==0.24.2
@@ -34,6 +35,7 @@ six==1.12.0
 sklearn==0.0
 smart-open==1.8.3
 soupsieve==1.9.1
+stop-words==2018.7.23
 torch==1.1.0
 torchvision==0.3.0
 tqdm==4.32.1
