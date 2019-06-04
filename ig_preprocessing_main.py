@@ -44,12 +44,15 @@ import img_data_utils as img
 # process all things for singl euser, then add to new row in new csv. new
 
 def main():
+    # relevant paths
     data_path = 'backbones/dataset.csv'
     new_csv_location = 'backbones/modified_dataset.csv'
     download_path_base = "backbones/ig_downloaded_imgs/"
-    # initialize pandas dataframe
-    df = pd.read_csv(data_path) # to be populated with modified captions and 17 image paths
-    # new_df = df # to be populated with modified captions and 17 image paths # DELETE?
+    # other constants
+    # numberPosts,website,urlProfile,username,numberFollowing,descriptionProfile,alias,numberFollowers,urlImgProfile,filename,date,urlImage,mentions,multipleImage,isVideo,localization,tags,numberLikes,url,description
+    desired_cols = ["username", "tags", "url", "description", "indiv_img_url", "downloaded_image"]
+
+    df = pd.read_csv(data_path) # pandas df to be populated with modified captions and 17 image paths
 
     ## caption modifications
 
@@ -72,6 +75,11 @@ def main():
     # includes actual download + placement of image
     download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
     df['downloaded_image'] = df['indiv_img_url'].apply(download_and_put_path)
+
+    # use combo groupby / lambda / etc to output df where each row is one user (descriptions are concatenated, download paths are comma separated)
+    df.groupby(['username'])['description'].apply(' '.join).reset_index() # concatanate post descriptions from each user using space 
+    df.groupby(['username'])['download_img'].apply(', '.join).reset_index() # comma separate image paths of images from each user using space
+
 
     df.to_csv(new_csv_location) # write to csv
 

@@ -43,6 +43,8 @@ def download_img(img_url, download_path_base, transforms=[]):
         return
     download_path = download_path_base + str(abs(hash(img_url)) % (10 ** 8)) + ".png"
     img = io.imread(img_url)
+    # PYTHON HOOK, if runs for minute then bail.. or try catch.
+    # FIRST Print url that it thinks it's erroring out on. 
     # Process img
     if transforms:
         for transform in transforms:
