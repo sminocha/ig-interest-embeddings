@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision.models as models
 
 HIDDEN_LAYER_SIZE = 256
+mse_loss = nn.BCELoss(size_average=False)
 
 class PoolingEmbedderAE(nn.Module):
     """Contractive AE adapted from https://github.com/avijit9/Contractive_Autoencoder_in_Pytorch/blob/master/CAE_pytorch.py"""
@@ -14,7 +15,6 @@ class PoolingEmbedderAE(nn.Module):
 
         self.relu = nn.ReLU()
 		self.sigmoid = nn.Sigmoid()
-
 
     def encoder(self, x):
 		embedding = self.relu(self.fc1(x.view(-1, self.in_features)))
@@ -29,7 +29,6 @@ class PoolingEmbedderAE(nn.Module):
             recons_x = self.decoder(embedding)
             return embedding, recons_x
 
-mse_loss = nn.BCELoss(size_average=False)
 
 def loss_fn(W, x, recons_x, h, lambda):
     mse = mse_loss(recons_x, x)
@@ -66,6 +65,7 @@ def train(AE, data, batch_size=32, num_epochs=20, lamb=1e-4):
 
             iter += batch_size
 
+
 def generate_embeddings(AE, data):
     """Generate pooled embedding using trained autoencoder"""
     N, D = data.shape
@@ -74,6 +74,7 @@ def generate_embeddings(AE, data):
         embedding = AE.encoder(transforms.functional.to_tensor(data[i]))
         embeddings[i] = embedding.numpy()
     return embeddings
+
 
 def main():
     # Load embeddings from different sources

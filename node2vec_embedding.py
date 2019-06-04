@@ -1,8 +1,9 @@
 import networkx as nx
 from node2vec import Node2Vec
+import pickle
 
 
-EMBEDDING_FILENAME = 'user_embeddings.kv'
+EMBEDDING_FILENAME = 'user_embeddings'
 EMBEDDING_MODEL_FILENAME = 'node2vec.model'
 
 
@@ -16,10 +17,17 @@ node2vec = Node2Vec(graph, dimensions=64, walk_length=30, num_walks=200, workers
 model = node2vec.fit(window=10, min_count=1, batch_words=4)  # Any keywords acceptable by gensim.Word2Vec can be passed, `diemnsions` and `workers` are automatically passed (from the Node2Vec constructor)
 
 # Look for most similar nodes
-model.wv.most_similar('alex_garza')  # Output node names are always strings
+print(model.wv.most_similar('alex_garza'))  # Output node names are always strings
 
 # Save embeddings for later use
-model.wv.save_word2vec_format(EMBEDDING_FILENAME)
+model.wv.save_word2vec_format(EMBEDDING_FILENAME+'.kv')
+
+# Save embeddings in dict and save dict:
+embedding_map = dict()
+for v in model.wv.vocab:
+    embedding_map[str(v)] = model.wv.word_vec(v)
+with open(EMBEDDING_FILENAME+'.pkl', 'wb') as f:
+        pickle.dump(embedding_map, f)
 
 # Save model for later use
 model.save(EMBEDDING_MODEL_FILENAME)
