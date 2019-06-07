@@ -20,7 +20,7 @@ def parse_hashtags(hashtag_str):
 
 def get_user_hashtags(df, username):
     """Aggregate all user hashtags into single set"""
-    user_rows = df.loc[df['username'] == username]
+    user_rows = df.loc[df['alias'] == username]
     hashtags = user_rows['tags'].tolist()
     all_tags = set()
     for tags in hashtags:
@@ -32,7 +32,7 @@ def get_user_hashtags(df, username):
 def filter_users(df):
     """Remove users that have no hashtags"""
     df['tags'].replace('', np.nan)
-    df.dropna(subset=['username','tags'], inplace=True)
+    df.dropna(subset=['alias','tags'], inplace=True)
     return df
 
 
@@ -48,10 +48,11 @@ def get_user_nodes(df):
     df = filter_users(df)
     user_nodes = []
     username_mapping = dict()
-    for username in df['username'].unique().tolist():
+    for username in df['alias'].unique().tolist():
         user_tags = get_user_hashtags(df, username)
 
-        parsed_username = clean_username(username)
+        # parsed_username = clean_username(username)
+        parsed_username = username
         username_mapping[parsed_username] = username
 
         user_node = (parsed_username, user_tags)

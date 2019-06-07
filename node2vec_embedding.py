@@ -17,7 +17,7 @@ node2vec = Node2Vec(graph, dimensions=64, walk_length=30, num_walks=200, workers
 model = node2vec.fit(window=10, min_count=1, batch_words=4)  # Any keywords acceptable by gensim.Word2Vec can be passed, `diemnsions` and `workers` are automatically passed (from the Node2Vec constructor)
 
 # Look for most similar nodes
-print(model.wv.most_similar('alex_garza'))  # Output node names are always strings
+# print(model.wv.most_similar('alex_garza'))  # Output node names are always strings
 
 # Save embeddings for later use
 model.wv.save_word2vec_format(EMBEDDING_FILENAME+'.kv')
