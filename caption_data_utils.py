@@ -1,5 +1,6 @@
 from googletrans import Translator
 import emoji
+import json
 
 # constants
 language = 'en'
@@ -66,6 +67,16 @@ def checkNoForeignCaptions(captions, language):
     detectionObjects = getDetection(captions)
     whichAreEnglish = [obj.lang==language for obj in detectionObjects]
     return all(whichAreEnglish)
+
+def transformCaptionColumn(caption):
+    """if caption is english, just translate, otherwise need to additionally remove emojis/tags/mentions"""
+    # print("CAPTION test: ", caption)
+    trimmed_capt = remove_unnecessary(caption)
+    try:
+        caption = trimmed_capt if isEnglish(trimmed_capt) else translateOne(trimmed_capt)
+    except json.decoder.JSONDecodeError:
+        return ''
+    return caption
 
 
 """

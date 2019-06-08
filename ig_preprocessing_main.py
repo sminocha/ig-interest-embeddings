@@ -32,12 +32,13 @@ import pandas as pd
 import data_utils as data
 import caption_data_utils as caption
 import img_data_utils as img
+from skimage.transform import resize
 # from collections import deque
 # from itertools import map
 
 def dropSelectedCols(df):
     """delete selected columns from pandas df object"""
-    cols_to_drop = ["website", "numberPosts", "numberFollowers", "numberFollowing", "filename", "date", "isVideo", "numberLikes"]
+    cols_to_drop = ["numberPosts", "website", "urlProfile", "username", "numberPosts", "numberFollowers", "numberFollowing", "filename", "date", "isVideo", "numberLikes"]
     df = df.drop(columns=cols_to_drop)
     return df
 
@@ -45,22 +46,27 @@ def performCaptionMods(df):
     """apply caption mods to df including caption translation + purging of emojis and other chars"""
     # if caption is english, simply remove unnecessary elements (captions/tag/mentions), otherwise translate then remove unnecessary elements
     # replace old captions with new ones in df
-    df['description'] = np.where(caption.isEnglish(caption.remove_unnecessary(df['description'])), caption.remove_unnecessary(df['description']), caption.removeThenTranslate(df['description']))
+    # df['description'] = np.where(caption.isEnglish(caption.remove_unnecessary(df['description'])), caption.remove_unnecessary(df['description']), caption.removeThenTranslate(df['description']))
+    transform_captions = lambda c: caption.transformCaptionColumn(c)
+    df['description'] = df['description'].apply(transform_captions)
     return df
 
 def filterBadURLS(df):
     """filter out records with post urls that pointed to deleted/bad images"""
     df = df[df['isolated_img_url'] != "INVALID_URL"]
+    return df
 
 def addIsolatedImgCol(df):
     """add column that transforms links of each full ig post to to urls of just that isolated img"""
     extract_post_urls = lambda post_url: img.extract_img_url(post_url)
     df['isolated_img_url'] = df['url'].apply(extract_post_urls)
+    return df
 
 def downloadImgAddPath(df, download_path_base):
     """download images located at isolated image urls, add col with local path to that image """
-    download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
+    download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base, transforms=[lambda i: resize(i, (224, 224))])
     df['downloaded_image'] = df['isolated_img_url'].apply(download_and_put_path)
+    return df
 
 def groupByKey(df, key, desired_cols):
     print(key)

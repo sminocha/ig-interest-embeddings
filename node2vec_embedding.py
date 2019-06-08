@@ -3,7 +3,7 @@ from node2vec import Node2Vec
 import pickle
 
 
-EMBEDDING_FILENAME = 'user_embeddings'
+EMBEDDING_FILENAME = 'node2vec_embeddings'
 EMBEDDING_MODEL_FILENAME = 'node2vec.model'
 
 

@@ -70,7 +70,7 @@ def create_path(post_url, download_path, transforms=[]):
             make sure that all saved images are the same size and resolution.
     """
     img_url = extract_img_url(post_url)
-    download_img(img_url, download_path)
+    download_img(img_url, download_path, transforms)
     return download_path
 
 

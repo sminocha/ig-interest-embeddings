@@ -78,6 +78,8 @@ def generate_embeddings(AE, data):
 
 def main():
     # Load embeddings from different sources
+    embedding_types = ['node2vec', 'lda', 'cnn']
+    embedding_paths = ['node2vec_embeddings.pkl', 'lda_embeddings.pkl', 'cnn_embeddings.pkl']
     # Concatenate embeddings
     # Instantiate model
     # Train model or load model weights
