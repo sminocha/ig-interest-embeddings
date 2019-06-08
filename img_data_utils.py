@@ -42,7 +42,7 @@ def download_img(img_url, download_path_base, transforms=[]):
     if img_url == "INVALID_URL":
         return
     # deterministic hash
-    download_path = download_path_base + str(abs(int(hashlib.md5(str.encode('x')).hexdigest(), 16)) % (10 ** 8)) + ".png"
+    download_path = download_path_base + str(abs(int(hashlib.md5(str.encode(img_url)).hexdigest(), 16)) % (10 ** 8)) + ".png"
 
     # try / except for url downloading (if we experience url timeout error, dont want to tank whole csv creation operation)
     try:
