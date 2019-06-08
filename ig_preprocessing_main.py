@@ -35,52 +35,93 @@ import img_data_utils as img
 # from collections import deque
 # from itertools import map
 
+def dropSelectedCols(df):
+    """delete selected columns from pandas df object"""
+    cols_to_drop = ["website", "numberPosts", "numberFollowers", "numberFollowing", "filename", "date", "isVideo", "numberLikes"]
+    df = df.drop(columns=cols_to_drop)
+    return df
 
-# get user nodes, using name
-# pandas data frame
-# todo for processing captions and images.
-# pd.read_csv(pass in path ), then grab column that has all captions
-# url image or url image profile, can go run image_data_utils on that link to download that photo.
-# process all things for singl euser, then add to new row in new csv. new
+def performCaptionMods(df):
+    """apply caption mods to df including caption translation + purging of emojis and other chars"""
+    # if caption is english, simply remove unnecessary elements (captions/tag/mentions), otherwise translate then remove unnecessary elements
+    # replace old captions with new ones in df
+    df['description'] = np.where(caption.isEnglish(caption.remove_unnecessary(df['description'])), caption.remove_unnecessary(df['description']), caption.removeThenTranslate(df['description']))
+    return df
+
+def filterBadURLS(df):
+    """filter out records with post urls that pointed to deleted/bad images"""
+    df = df[df['isolated_img_url'] != "INVALID_URL"]
+
+def addIsolatedImgCol(df):
+    """add column that transforms links of each full ig post to to urls of just that isolated img"""
+    extract_post_urls = lambda post_url: img.extract_img_url(post_url)
+    df['isolated_img_url'] = df['url'].apply(extract_post_urls)
+
+def downloadImgAddPath(df, download_path_base):
+    """download images located at isolated image urls, add col with local path to that image """
+    download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
+    df['downloaded_image'] = df['isolated_img_url'].apply(download_and_put_path)
+
+def groupByKey(df, key, desired_cols):
+    print(key)
+    """group records by alias/ig handle, outputting df where each row is one user, i.e. descriptions concatenated, download paths comma separated, etc."""
+    df['description'] = df[desired_cols].groupby([key])['description'].transform(lambda x: ' '.join(x))
+    df['downloaded_image'] = df[desired_cols].groupby([key])['downloaded_image'].transform(lambda x: ','.join(x))
+    df['mentions'] = df[desired_cols].groupby([key])['mentions'].transform(lambda x: ','.join(x))
+    df['tags'] = df[desired_cols].groupby([key])['tags'].transform(lambda x: ','.join(x))
+    df['isolated_img_url'] = df[desired_cols].groupby([key])['isolated_img_url'].transform(lambda x: ','.join(x))
+    # TODO: delete duplicate records
+
+def outputCaptionsMilestone(df, key, path, desired_cols):
+    """output csv with captions translated and users aggregated, for debugging purposes"""
+    df['description'] = df[desired_cols].groupby([key])['description'].transform(lambda x: ' '.join(x))
+    df['mentions'] = df[desired_cols].groupby([key])['mentions'].transform(lambda x: ','.join(x))
+    df['tags'] = df[desired_cols].groupby([key])['tags'].transform(lambda x: ','.join(x))
+    print("printed intermediate dataset, with relevant captions mods...")
+    df.to_csv(path)
 
 def main():
     # relevant paths
     data_path = 'backbones/dataset.csv'
     new_csv_location = 'backbones/modified_dataset.csv'
+    new_csv_milestone_location = 'backbones/captionsTranslated_dataset.csv'
     download_path_base = "backbones/ig_downloaded_imgs/"
     # other constants
     # numberPosts,website,urlProfile,username,numberFollowing,descriptionProfile,alias,numberFollowers,urlImgProfile,filename,date,urlImage,mentions,multipleImage,isVideo,localization,tags,numberLikes,url,description
-    desired_cols = ["username", "tags", "url", "description", "indiv_img_url", "downloaded_image"]
+    desired_cols_milestone = ["username", "alias", "tags", "url", "urlImage", "mentions", "description"]
+    desired_cols = desired_cols_milestone + ["isolated_img_url", "downloaded_image"]
 
     df = pd.read_csv(data_path) # pandas df to be populated with modified captions and 17 image paths
 
-    ## caption modifications
+    ## DEBUGGING
+    test_url_1 = "https://www.instagram.com/p/BTdRaquBZTD/?taken-by=1misssmeis"
+    test_url_2 = "https://www.instagram.com/p/BTdS7XgBe4X/?taken-by=1misssmeis"
+    row_screen = [test_url_1, test_url_2]
 
-    # if caption is english, simply remove unnecessary elements (captions/tag/mentions), otherwise translate then remove unnecessary elements
-    # replace old captions with new ones in df
-    # df['description'] = np.where(caption.isEnglish(df['description']), caption.remove_unnecessary(df['description']), caption.translateOne(caption.remove_unnecessary(df['description'])))
-    df['description'] = np.where(caption.isEnglish(caption.remove_unnecessary(df['description'])), caption.remove_unnecessary(df['description']), caption.removeThenTranslate(df['description']))
+    # dataframe with just rows selected by row_screen
+    df = df.loc[df['url'].isin(row_screen)] # select several rows by their url
+    ## DEBUGGING
+
+
+    df = dropSelectedCols(df) # drop unnecessary cols
+
+    ## caption modifications
+    df = performCaptionMods(df) # translate to english, remove emojis / hashtags / etc
+    outputCaptionsMilestone(df, 'alias', new_csv_milestone_location, desired_cols_milestone) # debugging - output csv with captions translated and users aggregated
     # STILL TODO: filtration : scrap datapoints that still have weird characters etc
 
-    ## image / image path modifications
-
-    # add column that transforms ig links of each post to individual img urls
-    extract_post_urls = lambda post_url: img.extract_img_url(post_url)
-    df['indiv_img_url'] = df['url'].apply(extract_post_urls)
-
-    # filter out records with "INVALID_URL" indiv_img_urls
-    df = df[df['indiv_img_url'] != "INVALID_URL"]
-
-    # add a column that transforms the individual img urls to a download path leading to that image
-    # includes actual download + placement of image
-    download_and_put_path = lambda indiv_img_url: img.download_img(indiv_img_url, download_path_base)
-    df['downloaded_image'] = df['indiv_img_url'].apply(download_and_put_path)
-
-    # use combo groupby / lambda / etc to output df where each row is one user (descriptions are concatenated, download paths are comma separated)
-    df.groupby(['username'])['description'].apply(' '.join).reset_index() # concatanate post descriptions from each user using space 
-    df.groupby(['username'])['download_img'].apply(', '.join).reset_index() # comma separate image paths of images from each user using space
+    ## image path / url modifications
+    addIsolatedImgCol(df) # convert col of post urls to isolated image urls
+    filterBadURLS(df) # filter out post urls from above that pointed to deleted/bad images
 
 
+    ## download images, add path col
+    downloadImgAddPath(df, download_path_base) # download images located at isolated image urls, add col with local path to that image
+
+    ## group by operations
+    groupByKey(df, 'alias', desired_cols) # aggregate records corresponding to the same user
+
+    ## publish
     df.to_csv(new_csv_location) # write to csv
 
 

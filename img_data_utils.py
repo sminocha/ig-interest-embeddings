@@ -41,10 +41,15 @@ def download_img(img_url, download_path_base, transforms=[]):
     # in case we received bad url...
     if img_url == "INVALID_URL":
         return
-    download_path = download_path_base + str(abs(hash(img_url)) % (10 ** 8)) + ".png"
-    img = io.imread(img_url)
-    # PYTHON HOOK, if runs for minute then bail.. or try catch.
-    # FIRST Print url that it thinks it's erroring out on. 
+    # deterministic hash
+    download_path = download_path_base + str(abs(int(hashlib.md5(str.encode('x')).hexdigest(), 16)) % (10 ** 8)) + ".png"
+
+    # try / except for url downloading (if we experience url timeout error, dont want to tank whole csv creation operation)
+    try:
+        img = io.imread(img_url)
+    except urllib.error.URLError:
+        print("Problem encountered, skipped downloading this image: ", img_url)
+
     # Process img
     if transforms:
         for transform in transforms:

@@ -124,4 +124,4 @@ def output_test_row(row_screen):
 
     df.to_csv(new_csv_location) # write to csv
 
-output_test_row(row_screen)
+# output_test_row(row_screen)
