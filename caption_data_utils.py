@@ -5,9 +5,6 @@ import json
 # constants
 language = 'en'
 
-
-googleTranslator = Translator()
-
 def remove_emojis(caption):
     """Remove emojis from the caption"""
     return emoji.get_emoji_regexp().sub(u'', str(caption))
@@ -28,8 +25,8 @@ def remove_mentions(caption):
 def remove_unnecessary(caption):
     """Remove emojis, tags, and mentions from caption"""
     noEmojis = remove_emojis(caption)
-    alsoNoTags = remove_tags(noEmojis)
-    return remove_mentions(alsoNoTags)
+    # alsoNoTags = remove_tags(noEmojis)
+    return remove_mentions(noEmojis)
 
 '''
 Source language isn't given in our data, and many captions are from non
@@ -39,12 +36,14 @@ Translate a user's 17 captions from source language to english (uses single
 method call and single HTTP session). Return as list of translations.
 '''
 def translateListToEnglish(captionsList, language):
+    googleTranslator = Translator()
     en_translations = googleTranslator.translate(captionsList, dest=language)
     en_translations = [translation.text for translation in translations]
     return en_translations
 
 def translateOne(caption):
     """Translate caption into english"""
+    googleTranslator = Translator()
     en_translation = googleTranslator.translate(caption, 'en')
     return en_translation.text
 
@@ -55,6 +54,7 @@ def removeThenTranslate(caption):
 
 def getDetection(caption):
     """output googletrans detection object or objects (in case input is a list)"""
+    googleTranslator = Translator()
     return googleTranslator.detect(caption)
 
 def isEnglish(caption):
@@ -75,8 +75,9 @@ def transformCaptionColumn(caption):
     try:
         caption = trimmed_capt if isEnglish(trimmed_capt) else translateOne(trimmed_capt)
     except json.decoder.JSONDecodeError:
+        print("Error decoding\n")
         return ''
-    return caption
+    return caption.replace(',', '')
 
 
 """
