@@ -2,6 +2,7 @@ from googletrans import Translator
 import emoji
 import json
 from textblob import TextBlob
+import langid
 
 # constants
 language = 'en'
@@ -57,7 +58,8 @@ def getDetection(caption):
     """output googletrans detection object or objects (in case input is a list)"""
     # googleTranslator = Translator()
     # return googleTranslator.detect(caption)
-    return TextBlob(caption).detect_language()
+    # return TextBlob(caption).detect_language()
+    return langid.classify(caption)[0]
 
 def isEnglish(caption):
     """return true if caption in english, false otherwise"""
@@ -79,7 +81,7 @@ def transformCaptionColumn(caption):
     trimmed_capt = remove_unnecessary(caption)
     try:
         caption = trimmed_capt if isEnglish(trimmed_capt) else ''# translateOne(trimmed_capt)
-    except e:
+    except urllib.error.HTTPError:
         print("Error decoding\n")
         return ''
     return caption.replace(',', '')
