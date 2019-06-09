@@ -28,8 +28,8 @@ def main():
     with open(new_csv_captions_location, 'a') as f:
         # Process each user independently
         usernames = src_df['alias'].unique().tolist()
-        # idx_at = usernames.index('burakkahveci')
-        for username in usernames:
+        idx_at = usernames.index('anadeliafitness')
+        for username in usernames[idx_at+1:]:
             print("Processing {}".format(username))
             # Get the rows corresponding to the user
             user_rows = src_df.loc[src_df['alias'] == username]
