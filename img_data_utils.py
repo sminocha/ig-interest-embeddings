@@ -49,6 +49,7 @@ def download_img(img_url, download_path_base, transforms=[]):
         img = io.imread(img_url)
     except urllib.error.URLError:
         print("Problem encountered, skipped downloading this image: ", img_url)
+        return ''
 
     # Process img
     if transforms:
