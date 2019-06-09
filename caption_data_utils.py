@@ -1,6 +1,7 @@
 from googletrans import Translator
 import emoji
 import json
+from textblob import TextBlob
 
 # constants
 language = 'en'
@@ -54,13 +55,17 @@ def removeThenTranslate(caption):
 
 def getDetection(caption):
     """output googletrans detection object or objects (in case input is a list)"""
-    googleTranslator = Translator()
-    return googleTranslator.detect(caption)
+    # googleTranslator = Translator()
+    # return googleTranslator.detect(caption)
+    return TextBlob(caption).detect_language()
 
 def isEnglish(caption):
     """return true if caption in english, false otherwise"""
-    detectionObject = getDetection(caption)
-    return detectionObject.lang == 'en'
+    if len(caption) < 3:
+        return False
+    # detectionObject = getDetection(caption)
+    # return detectionObject.lang == 'en'
+    return getDetection(caption) == 'en'
 
 def checkNoForeignCaptions(captions, language):
     """return true if all captions are english, false if there is a foreign caption"""
@@ -73,8 +78,8 @@ def transformCaptionColumn(caption):
     # print("CAPTION test: ", caption)
     trimmed_capt = remove_unnecessary(caption)
     try:
-        caption = trimmed_capt if isEnglish(trimmed_capt) else translateOne(trimmed_capt)
-    except json.decoder.JSONDecodeError:
+        caption = trimmed_capt if isEnglish(trimmed_capt) else ''# translateOne(trimmed_capt)
+    except e:
         print("Error decoding\n")
         return ''
     return caption.replace(',', '')
