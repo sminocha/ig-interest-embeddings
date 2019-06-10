@@ -26,10 +26,14 @@ def load_embeddings(types, paths, concatenate=True):
     for dict_path in paths:
         with open(dict_path, 'rb') as f:
             embeddings_dicts.append(pickle.load(f))
+    # print(embeddings_dicts)
     # Determine combined embedding size
     embedding_size = 0
+    embedding_sizes = []
     for d in embeddings_dicts:
-        embedding_size += list(d.items())[0][1].shape[-1]
+        size = list(d.items())[0][1].shape[-1]
+        embedding_size += size
+        embedding_sizes.append(size)
     # Store all embeddings into a single base dictionary by name
     base_dict = dict(embeddings_dicts[0])
     for d_idx in range(1, len(embeddings_dicts)):
@@ -45,11 +49,14 @@ def load_embeddings(types, paths, concatenate=True):
     ordered_vocab = sorted(usernames)
     # Extract np array of embeddings from each dict
     embeddings = []
-    N, D = len(ordered_vocab), embedding_size
-    for d in embeddings_dicts:
+    for i, d in enumerate(embeddings_dicts):
+        N, D = len(ordered_vocab), embedding_sizes[i]
         embedding = np.zeros((N, D))
         for idx in range(N):
             embedding[idx] = d[ordered_vocab[idx]]
+        embeddings.append(embedding)
     if concatenate:
-        embeddings = [np.vstack(tuple(embeddings))]
+        embeddings = [np.hstack(tuple(embeddings))]
+        assert(embeddings[0].shape == (N, embedding_size))
+        print(embeddings[0].shape)
     return ordered_vocab, embeddings

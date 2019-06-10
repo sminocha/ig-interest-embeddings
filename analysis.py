@@ -21,14 +21,18 @@ def main():
         ret_di = pickle.load(f)
         print(type(ret_di['theworldguru']))
 
-    with open('cnn_embeddings_2.pkl', 'rb') as f:
+    with open('cnn_embeddings_1.pkl', 'rb') as f:
         ret_di = pickle.load(f)
-        # print(ret_di['1misssmeis'].shape)
+        print(ret_di['1misssmeis'].shape)
         # print(sorted(list(ret_di.keys())))
 
     with open('lda_embeddings.pkl', 'rb') as f:
         ret_di = pickle.load(f)
         print(ret_di['1misssmeis'])
+
+    with open('pool_embeddings.pkl', 'rb') as f:
+        ret_di = pickle.load(f)
+        print(ret_di['1misssmeis'].shape)
 
     # # Load embeddings
     #
