@@ -13,7 +13,7 @@ googletrans==2.4.0
 idna==2.8
 imageio==2.5.0
 jmespath==0.9.4
-joblib==0.13.2
+joblib==1.2.0
 kiwisolver==1.1.0
 langid==1.1.6
 matplotlib==3.1.0
